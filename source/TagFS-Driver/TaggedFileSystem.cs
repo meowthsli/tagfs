@@ -17,127 +17,127 @@ namespace Meowth.TagFSDriver
             Init(); // exception
         }
 
-        public int CreateFile(string filename, FileAccess access, FileShare share, FileMode mode, FileOptions options, DokanFileInfo info)
+        public virtual int CreateFile(string filename, FileAccess access, FileShare share, FileMode mode, FileOptions options, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int OpenDirectory(string filename, DokanFileInfo info)
+        public virtual int OpenDirectory(string filename, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int CreateDirectory(string filename, DokanFileInfo info)
+        public virtual int CreateDirectory(string filename, DokanFileInfo info)
+        {
+            return -1;
+        }
+
+        public virtual int Cleanup(string filename, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int Cleanup(string filename, DokanFileInfo info)
+        public virtual int CloseFile(string filename, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int CloseFile(string filename, DokanFileInfo info)
+        public virtual int ReadFile(string filename, byte[] buffer, ref uint readBytes, long offset, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int ReadFile(string filename, byte[] buffer, ref uint readBytes, long offset, DokanFileInfo info)
+        public virtual int WriteFile(string filename, byte[] buffer, ref uint writtenBytes, long offset, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int WriteFile(string filename, byte[] buffer, ref uint writtenBytes, long offset, DokanFileInfo info)
+        public virtual int FlushFileBuffers(string filename, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int FlushFileBuffers(string filename, DokanFileInfo info)
+        public virtual int GetFileInformation(string filename, FileInformation fileinfo, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int GetFileInformation(string filename, FileInformation fileinfo, DokanFileInfo info)
+        public virtual int FindFiles(string filename, ArrayList files, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int FindFiles(string filename, ArrayList files, DokanFileInfo info)
+        public virtual int SetFileAttributes(string filename, FileAttributes attr, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int SetFileAttributes(string filename, FileAttributes attr, DokanFileInfo info)
+        public virtual int SetFileTime(string filename, DateTime ctime, DateTime atime, DateTime mtime, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int SetFileTime(string filename, DateTime ctime, DateTime atime, DateTime mtime, DokanFileInfo info)
+        public virtual int DeleteFile(string filename, DokanFileInfo info)
+        {
+            throw new NotImplementedException();
+            try { return -1; }
+            catch { return -1; }
+        }
+
+        public virtual int DeleteDirectory(string filename, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int DeleteFile(string filename, DokanFileInfo info)
+        public virtual int MoveFile(string filename, string newname, bool replace, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int DeleteDirectory(string filename, DokanFileInfo info)
+        public virtual int SetEndOfFile(string filename, long length, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int MoveFile(string filename, string newname, bool replace, DokanFileInfo info)
+        public virtual int SetAllocationSize(string filename, long length, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int SetEndOfFile(string filename, long length, DokanFileInfo info)
+        public virtual int LockFile(string filename, long offset, long length, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int SetAllocationSize(string filename, long length, DokanFileInfo info)
+        public virtual int UnlockFile(string filename, long offset, long length, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int LockFile(string filename, long offset, long length, DokanFileInfo info)
+        public virtual int GetDiskFreeSpace(ref ulong freeBytesAvailable, ref ulong totalBytes, ref ulong totalFreeBytes, DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
         }
 
-        public int UnlockFile(string filename, long offset, long length, DokanFileInfo info)
-        {
-            try { return -1; }
-            catch { return -1; }
-        }
-
-        public int GetDiskFreeSpace(ref ulong freeBytesAvailable, ref ulong totalBytes, ref ulong totalFreeBytes, DokanFileInfo info)
-        {
-            try { return -1; }
-            catch { return -1; }
-        }
-
-        public int Unmount(DokanFileInfo info)
+        public virtual int Unmount(DokanFileInfo info)
         {
             return DOKAN_SUCCESS;
         }

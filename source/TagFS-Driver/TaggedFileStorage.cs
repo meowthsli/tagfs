@@ -3,7 +3,6 @@ using System.IO;
 using System.Transactions;
 using Community.CsharpSqlite.SQLiteClient;
 using log4net;
-using log4net.Core;
 
 namespace Meowth.TagFSDriver
 {

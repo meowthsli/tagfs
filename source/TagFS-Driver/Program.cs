@@ -1,3 +1,5 @@
+using System;
+using Castle.DynamicProxy;
 using Dokan;
 
 namespace Meowth.TagFSDriver
@@ -15,11 +17,26 @@ namespace Meowth.TagFSDriver
                               VolumeLabel = "TAGFS",
                           };
 
+            var target = new TaggedFileSystem(
+                new TaggedFileSystemOptions
+                    {
+                        RootPath = "d:\\tmp",
+                    });
+
+            var fileSystem = new ProxyGenerator()
+                .CreateInterfaceProxyWithTarget<DokanOperations>(
+                target,
+                new WrappingInterceptor()
+            );
+            
+            // Entry point
             var status = DokanNet.DokanMain(
-                dokanOptions, 
-                new TaggedFileSystem(new TaggedFileSystemOptions())
+                dokanOptions,
+                null
                 );
             return status;
         }
     }
+
+    
 }
