@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Castle.DynamicProxy;
 using Dokan;
 
@@ -17,24 +18,32 @@ namespace Meowth.TagFSDriver
                               VolumeLabel = "TAGFS",
                           };
 
-            var target = new TaggedFileSystem(
-                new TaggedFileSystemOptions
-                    {
-                        RootPath = "d:\\tmp",
-                    });
+            var options = new TaggedFileSystemOptions { RootPath = "d:\\tmp"};
+            options.Init();
+
+            var database = new Database(options.ServicePath);
+            var taggedFileStorage = new TaggedFileStorage(database);
+            var target = new TaggedFileSystem(options, taggedFileStorage);
 
             var fileSystem = new ProxyGenerator()
                 .CreateInterfaceProxyWithTarget<DokanOperations>(
                 target,
-                new WrappingInterceptor()
+                new WrappingInterceptor(),
+                new TransactionManagementInterceptor(database)
             );
             
             // Entry point
-            var status = DokanNet.DokanMain(
-                dokanOptions,
-                null
-                );
-            return status;
+            //var status = DokanNet.DokanMain(
+            //    dokanOptions,
+            //    fileSystem
+            //    );
+            //return status;
+            fileSystem.CreateDirectory("Hello", new DokanFileInfo(0));
+            fileSystem.CreateDirectory("Bye", new DokanFileInfo(0));
+
+            var list = new ArrayList();
+            fileSystem.FindFiles("ccscc", list, new DokanFileInfo(0));
+            return -1;
         }
     }
 

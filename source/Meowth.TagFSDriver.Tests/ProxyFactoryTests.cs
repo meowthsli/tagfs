@@ -12,14 +12,14 @@ namespace Meowth.TagFSDriver.Tests
         [Test]
         public void TestCreationFS()
         {
-            var pf = new ProxyGenerator()
-                .CreateInterfaceProxyWithTarget<DokanOperations>(
-                    new TaggedFileSystem(new TaggedFileSystemOptions{ RootPath = Path.GetTempPath()}),
-                    new WrappingInterceptor(), 
-                    new TransactionManagementInterceptor()
-                );
+            //var pf = new ProxyGenerator()
+            //    .CreateInterfaceProxyWithTarget<DokanOperations>(
+            //        new TaggedFileSystem(new TaggedFileSystemOptions{ RootPath = Path.GetTempPath()}),
+            //        new WrappingInterceptor(), 
+            //        new TransactionManagementInterceptor(new Database(null))
+            //    );
             
-            pf.DeleteFile(null, null);
+            //pf.DeleteFile(null, null);
         }
     }
 }

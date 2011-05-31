@@ -10,11 +10,10 @@ namespace Meowth.TagFSDriver
     /// <summary> Our virtual filesystem </summary>
     public class TaggedFileSystem : DokanOperations
     {
-        public TaggedFileSystem(TaggedFileSystemOptions options)
+        public TaggedFileSystem(TaggedFileSystemOptions options, TaggedFileStorage storage)
         {
             _options = options;
-
-            Init(); // exception
+            _storage = storage;
         }
 
         public virtual int CreateFile(string filename, FileAccess access, FileShare share, FileMode mode, FileOptions options, DokanFileInfo info)
@@ -31,7 +30,9 @@ namespace Meowth.TagFSDriver
 
         public virtual int CreateDirectory(string filename, DokanFileInfo info)
         {
-            return -1;
+            _storage.CreateTag(filename, null);
+
+            return 0;
         }
 
         public virtual int Cleanup(string filename, DokanFileInfo info)
@@ -72,8 +73,10 @@ namespace Meowth.TagFSDriver
 
         public virtual int FindFiles(string filename, ArrayList files, DokanFileInfo info)
         {
-            try { return -1; }
-            catch { return -1; }
+            foreach (var tag in _storage.ListTags(null))
+                files.Add(tag.TagName);
+
+            return 0;
         }
 
         public virtual int SetFileAttributes(string filename, FileAttributes attr, DokanFileInfo info)
@@ -144,53 +147,12 @@ namespace Meowth.TagFSDriver
 
         private const int DOKAN_SUCCESS = 0;
 
-        /// <summary> Validates settings against pc configuration </summary>
-        private void Init() // exception
-        {
-            try
-            {
-                // Check if exists
-                if (File.Exists(_options.RootPath))
-                {
-                    // This is a directory, not a fle
-                    throw new ApplicationException(
-                        string.Format("{0} is a file, not a directory", _options.RootPath)); // exception
-                }
-
-                if (CreateDirIfNo(_options.RootPath)) // exception
-                {
-                    CreateDirIfNo(_options.ContentPath); // exception
-                    CreateDirIfNo(_options.ServicePath); // exception
-                }
-            }
-            catch (Exception ex)
-            {
-                s_logger.Fatal("Error preparing target file system", ex);
-                throw;
-            }
-        }
-
         private static readonly ILog s_logger = LogManager.GetLogger(typeof(TaggedFileSystem));
-
-        /// <summary> </summary>
-        /// <returns> Whether dir has been created </returns>
-        private static bool CreateDirIfNo(string path) // exception
-        {
-            if (!Directory.Exists(path))
-            {
-                s_logger.DebugFormat("Directory '{0}' not exists", path);
-                Directory.CreateDirectory(path); // exception
-                s_logger.DebugFormat("Directory '{0}' has been created", path);
-
-                return true;
-            }
-
-            s_logger.DebugFormat("Directory '{0}' already exists", path);
-            return false;
-        }
-
+        
         /// <summary> File system options </summary>
-        private TaggedFileSystemOptions _options;
+        private readonly TaggedFileSystemOptions _options;
+
+        private readonly TaggedFileStorage _storage;
     }
 
     /// <summary> Options of creating tagged fs </summary>
@@ -223,6 +185,52 @@ namespace Meowth.TagFSDriver
         {
             return Path.Combine(RootPath, fileId.ToString());
         }
+
+        /// <summary> Validates settings against pc configuration </summary>
+        public void Init() // exception
+        {
+            try
+            {
+                // Check if exists
+                if (File.Exists(RootPath))
+                {
+                    // This is a directory, not a fle
+                    throw new ApplicationException(
+                        string.Format("{0} is a file, not a directory", RootPath)); // exception
+                }
+
+                if (CreateDirIfNo(RootPath)) // exception
+                {
+                    CreateDirIfNo(ContentPath); // exception
+                    CreateDirIfNo(ServicePath); // exception
+                }
+            }
+            catch (Exception ex)
+            {
+                s_logger.Fatal("Error preparing target file system", ex);
+                throw;
+            }
+        }
+
+        /// <summary> </summary>
+        /// <returns> Whether dir has been created </returns>
+        private static bool CreateDirIfNo(string path) // exception
+        {
+            if (!Directory.Exists(path))
+            {
+                s_logger.DebugFormat("Directory '{0}' not exists", path);
+                Directory.CreateDirectory(path); // exception
+                s_logger.DebugFormat("Directory '{0}' has been created", path);
+
+                return true;
+            }
+
+            s_logger.DebugFormat("Directory '{0}' already exists", path);
+            return false;
+        }
+
+        /// <summary> Logger </summary>
+        private static readonly ILog s_logger = LogManager.GetLogger(typeof(TaggedFileSystem));
 
         /// <summary> Path to storage root dir </summary>
         private string _rootPath;
