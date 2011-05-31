@@ -65,23 +65,23 @@
   <ItemGroup>
     <Compile Include="ITaggingRepository.cs" />
     <Compile Include="ITransactionManagement.cs" />
-    <Compile Include="PhantomFile.cs" />
-    <Compile Include="RealFile.cs" />
-    <Compile Include="Tag.cs" />
+    <Compile Include="Domain\PhantomFile.cs" />
+    <Compile Include="Domain\RealFile.cs" />
+    <Compile Include="Domain\Tag.cs" />
     <Compile Include="TaggedFileStorage.cs" />
     <Compile Include="TaggedFileSystem.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TransactionManagementInterceptor.cs" />
+    <Compile Include="Interceptors\TransactionManagementInterceptor.cs" />
     <Compile Include="Database.cs" />
-    <Compile Include="WrappingInterceptor.cs" />
+    <Compile Include="Interceptors\WrappingInterceptor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\libs\sqlite\sqlite3.dll">
-      <Link>sqlite3.dll</Link>
+      <Link>Req\sqlite3.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

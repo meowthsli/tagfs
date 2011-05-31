@@ -49,7 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TagFS-Driver\Meowth.TagFSDriver.csproj">
+    <ProjectReference Include="..\Meowth.TagFSDriver\Meowth.TagFSDriver.csproj">
       <Project>{2E18673F-1270-412B-B5AB-E62300A98E3C}</Project>
       <Name>Meowth.TagFSDriver</Name>
     </ProjectReference>

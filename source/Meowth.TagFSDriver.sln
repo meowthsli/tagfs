@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meowth.TagFSDriver", "Meowth.TagFSDriver.csproj", "{2E18673F-1270-412B-B5AB-E62300A98E3C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meowth.TagFSDriver", "Meowth.TagFSDriver\Meowth.TagFSDriver.csproj", "{2E18673F-1270-412B-B5AB-E62300A98E3C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{EA5044B7-216C-4E35-844D-D866A9885C06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meowth.TagFSDriver.Tests", "..\Meowth.TagFSDriver.Tests\Meowth.TagFSDriver.Tests.csproj", "{FA6165D6-7AAB-4820-9924-1532CF00DE2D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meowth.TagFSDriver.Tests", "Meowth.TagFSDriver.Tests\Meowth.TagFSDriver.Tests.csproj", "{FA6165D6-7AAB-4820-9924-1532CF00DE2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
