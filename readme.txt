@@ -1,0 +1,1 @@
+See Main.cs for hardcoded options first, hehe 
