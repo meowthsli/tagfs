@@ -81,7 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\libs\sqlite\sqlite3.dll">
-      <Link>Req\sqlite3.dll</Link>
+      <Link>sqlite3.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
