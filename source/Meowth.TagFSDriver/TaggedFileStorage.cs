@@ -9,6 +9,9 @@ namespace Meowth.TagFSDriver
     /// <summary> Storage of files and their tags </summary>
     public class TaggedFileStorage
     {
+        const string ROOT_NAME = "\\";
+        private const char SEPARATOR = '\\';
+
         private readonly ITaggingRepository _repository;
 
         /// <summary> File storage </summary>
@@ -18,46 +21,52 @@ namespace Meowth.TagFSDriver
         }
         
         /// <summary> Returns tag name</summary>
-        public string CreateTag(string tagName, string parentTagName) // exception
+        public void CreateTag(string tagPath) // exception
         {
-            Tag parentTag = null;
-            if (parentTagName != null)
+            if (FindTagByPath(tagPath) != null) // exception
             {
-                parentTag = FindTag(parentTagName);
-                if(parentTag == null)
-                    throw new ApplicationException(string.Format("Parent tag '{0}' not found", parentTagName)); // exception
+                s_logger.WarnFormat("Tag '{0}' already exists", tagPath);
+                throw new ApplicationException("Tag already exists");
             }
 
-            var tagFullName = (parentTag != null) 
-                ? Tag.Combine(parentTagName, tagName) 
-                : tagName;
+            var pathComponents = tagPath.Split(new[]{SEPARATOR}, StringSplitOptions.None);
+            if(pathComponents.Length < 2)
+                throw new ApplicationException("Invalid tag name");
+            
+            var newTagName = pathComponents[pathComponents.Length - 1];
+            if(tagPath.IndexOfAny(Path.GetInvalidFileNameChars()) > 0)
+                throw new ApplicationException("Invalid tag name");
 
-            if (FindTag(tagFullName) != null) // exception
-            {
-                s_logger.WarnFormat("Tag '{0}' already exists", tagFullName);
-                return tagFullName;
-            }
+            var parentTagPathComponents = new string[pathComponents.Length - 1];
+            Array.Copy(pathComponents, 0, parentTagPathComponents, 0, parentTagPathComponents.Length);
+            var parentTagPath = string.Join(new string(new[]{SEPARATOR}), parentTagPathComponents);
 
-            var parentTagId = (parentTag != null)
-                                  ? (long?) parentTag.Id
-                                  : null;
+            var parentTag = (pathComponents.Length == 2)
+                ? FindTagByPath(ROOT_NAME)
+                : FindTagByPath(parentTagPath);
+
+            if(parentTag == null)
+                throw new ApplicationException(string.Format("Parent tag, Path = '{0}' not found", parentTagPath));
+            
             _repository.DataContext.Insert(new Tag
             {
-                TagName = tagName,
-                TagPath = tagFullName,
-                ParentTagId = parentTagId
+                TagName = newTagName,
+                TagPath = tagPath,
+                ParentTagId = parentTag.Id
             }); // exception
 
-            return tagFullName;
+            return;
         }
 
         /// <summary> Lists all tags under given tag </summary>
-        /// <param name="tagName"></param>
+        /// <param name="tagPath"></param>
         /// <returns></returns>
-        public Tag[] ListTags(string tagName)
+        public Tag[] ListTags(string tagPath)
         {
-            // tag name can be null, so use root tags and phantoms
-            return (from Tag tag in _repository.Tags select tag).ToArray();
+            return (from Tag tag in _repository.Tags
+                    join parentTag in _repository.Tags on tag.ParentTagId equals parentTag.Id
+                    where parentTag.TagPath == tagPath && tag.TagName != ROOT_NAME
+                    select tag).ToArray();
         }
 
         /// <summary> Enlists all phantoms under given tag </summary>
@@ -65,78 +74,31 @@ namespace Meowth.TagFSDriver
         /// <returns></returns>
         public PhantomFile[] ListPhantoms(string tagName)
         {
-            // tag name can be null, so use root tags and phantoms
-            
-                throw new NotImplementedException();
+            return new PhantomFile[0];
         }
 
-        /// <summary> Finds tag by name </summary>
-        private Tag FindTag(string tagName) // exception
+        /// <summary> Deletes tag from repository </summary>
+        /// <param name="tagPath"> Path to tag to delete </param>
+        public void DeleteTag(string tagPath)
         {
-            return _repository
-               .Tags
-               .Where(t => t.TagName == tagName).FirstOrDefault();
-        }
-
-        private Tag GetTag(string tagName) // exception
-        {
-            var tag = FindTag(tagName);
+            var tag = FindTagByPath(tagPath);
             if (tag == null)
-                throw new InvalidDataException(string.Format("Tag '{0}' not found", tagName));
+            {
+                var msg = string.Format("Tag '{0}' not found", tagPath);
+                s_logger.Error(msg);
+                throw new ApplicationException(msg);
+            }
 
-            return tag;
+            _repository.Tags
+                .Delete(t => t.TagPath.StartsWith(tagPath));
         }
 
-        ///// <summary> Deletes phantom file under given tag </summary>
-        ///// <remarks> If no other phantom exists referencing real file, this file will be deleted physically</remarks>
-        //public void DeletePhantom(string tagName, string phantomName)
-        //{
-           
-        //        s_logger.DebugFormat("Deleting (tag, phantom) = ('{0}', '{1}')", tagName, phantomName);
-
-        //        var tag = GetTag(tagName);
-        //        var phantom = GetPhantom(tagName, phantomName);
-        //        var phantoms = GetPhantoms(phantom.RealFileId);
-
-        //        // TODO: delete phantom from database
-
-        //        if (phantoms.Length == 0)
-        //        {
-        //            s_logger.DebugFormat("No more phantoms reference file '{0}'; deleting real file", phantomName);
-        //            var realFile = GetRealFile(phantom.RealFileId); // esxeption
-        //            var pathToFile = Path.Combine(_storageDir, realFile.SyntheticName);
-        //            File.Delete(pathToFile); // exception
-        //        }
-            
-        //}
-
-        /// <summary> Deletes tag and it's phantoms. If no references to real file exist, 
-        /// file is also deleted </summary>
-        /// <param name="tagName"></param>
-        public void DeleteTag(string tagName) // exception
+        /// <summary> Finds tag by path. </summary>
+        /// <returns> Returns <see langword="null"/>, if no such tag found. </returns>
+        private Tag FindTagByPath(string tagPath) // exception
         {
-            _repository.DataContext.Delete(GetTag(tagName));
-        }
-
-        private RealFile GetRealFile(int realFileId)
-        {
-            throw new NotImplementedException();
-        }
-
-        private PhantomFile GetPhantom(string tagName, string phantomName)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary> Finds all phantoms that reference concrete file </summary>
-        private PhantomFile[] GetPhantoms(int realFileId)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void DeletePhantom(int phantomId)
-        {
-            
+            return _repository.Tags
+               .Where(t => t.TagPath == tagPath).FirstOrDefault();
         }
 
         /// <summary> Logging facility </summary>

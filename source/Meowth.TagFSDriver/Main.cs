@@ -10,42 +10,37 @@ namespace Meowth.TagFSDriver
     {
         public static int Main(string[] args)
         {
+            log4net.Config.XmlConfigurator.Configure();
+
             var dokanOptions = new DokanOptions
                           {
                               MountPoint = "r:\\", 
                               DebugMode = true, 
                               UseStdErr = true, 
                               VolumeLabel = "TAGFS",
+                              ThreadCount = 1
                           };
 
-            var options = new TaggedFileSystemOptions { RootPath = "d:\\tmp"};
+            var options = new TaggedFileSystemOptions { RootPath = "d:\\tmp" };
             options.Init();
 
-            var database = new Database(options.ServicePath);
-            var taggedFileStorage = new TaggedFileStorage(database);
+            var databaseOriginal = new Database(options.ServicePath);
+            var taggedFileStorage = new TaggedFileStorage(databaseOriginal);
             var target = new TaggedFileSystem(options, taggedFileStorage);
 
-            var fileSystem = new ProxyGenerator()
+            var fileSystemPxy = new ProxyGenerator()
                 .CreateInterfaceProxyWithTarget<DokanOperations>(
                 target,
                 new WrappingInterceptor(),
-                new TransactionManagementInterceptor(database)
+                new TransactionManagementInterceptor(databaseOriginal)
             );
-            
-            // Entry point
-            //var status = DokanNet.DokanMain(
-            //    dokanOptions,
-            //    fileSystem
-            //    );
-            //return status;
-            fileSystem.CreateDirectory("Hello", new DokanFileInfo(0));
-            fileSystem.CreateDirectory("Bye", new DokanFileInfo(0));
+           
+            var status = DokanNet.DokanMain(
+                dokanOptions,
+                fileSystemPxy
+                );
 
-            var list = new ArrayList();
-            fileSystem.FindFiles("ccscc", list, new DokanFileInfo(0));
-            return -1;
+            return status;
         }
     }
-
-    
 }

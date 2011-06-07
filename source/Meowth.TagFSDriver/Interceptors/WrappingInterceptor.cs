@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Castle.DynamicProxy;
 using Dokan;
 using log4net;
@@ -13,10 +14,16 @@ namespace Meowth.TagFSDriver
         /// <returns> Original result or <see cref="DokanNet.DOKAN_ERROR"/> if any error occured </returns>
         public void Intercept(IInvocation info)
         {
+            var timer = new Stopwatch();
             try
             {
+                timer.Start();
                 s_logger.DebugFormat("Entering method '{0}'", info.Method.Name);
+                var @params = info.Method.GetParameters();
+                for (var i = 0; i < @params.Length ; ++i )
+                    s_logger.DebugFormat("    Argument '{0}' = '{1}'", @params[i].Name, info.Arguments[i]);
                 info.Proceed();
+                timer.Stop();
             }
             catch(Exception ex)
             {
@@ -27,8 +34,9 @@ namespace Meowth.TagFSDriver
                 s_logger.DebugFormat("..Will return {0}", DokanNet.DOKAN_ERROR);
                 info.ReturnValue = DokanNet.DOKAN_ERROR;
             }
-
-            s_logger.DebugFormat("Exiting method '{0}'", info.Method.Name);
+            
+            s_logger.DebugFormat("Exiting method '{0}', execution time {1} ms", info.Method.Name, timer.ElapsedMilliseconds);
+            timer.Reset();
         }
 
         /// <summary> Logger (like TaggedFS) </summary>

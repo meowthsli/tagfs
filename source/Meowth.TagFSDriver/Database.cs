@@ -1,5 +1,6 @@
 using System;
 using System.Data.SQLite;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
@@ -24,7 +25,7 @@ namespace Meowth.TagFSDriver
         public void BeginTransaction() // exception
         {
             if(InTransaction)
-                throw new InvalidOperationException("Already in transaction"); // exception
+                throw new InvalidOperationException("Cannot start transaction: already in transaction"); // exception
 
             // Begin transaction
             CurrentDbSession = new DbManager(new SQLiteDataProvider(), _databaseConnection)
@@ -39,6 +40,7 @@ namespace Meowth.TagFSDriver
                 throw new InvalidOperationException("Not in transaction yet"); // exception
             
             CurrentDbSession.CommitTransaction(); // exception
+            CurrentDbSession = null;
         }
         
         /// <summary> Rolling all back </summary>
@@ -110,7 +112,7 @@ CREATE TABLE IF NOT EXISTS Tag (
     Id INTEGER PRIMARY KEY AUTOINCREMENT, 
     TagPath TEXT UNIQUE NOT NULL,
     TagName TEXT NOT NULL,
-    ParentTagId INTEGER);
+    ParentTagId INTEGER NOT NULL);
 
 CREATE INDEX IF NOT EXISTS IX_TagName ON Tag (
     TagName ASC
@@ -120,6 +122,10 @@ CREATE INDEX IF NOT EXISTS IX_ParentTag ON Tag (
     ParentTagId ASC
     );
 
+INSERT OR IGNORE INTO 
+    Tag (Id, TagPath, TagName, ParentTagId) 
+VALUES
+    (1, '\', '\', 1);
 ";
             using(var cmd = _databaseConnection.CreateCommand())
             {

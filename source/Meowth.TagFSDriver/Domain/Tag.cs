@@ -20,7 +20,7 @@ namespace Meowth.TagFSDriver
 
         public static string Combine(string parent, string tag)
         {
-            return string.Format("{0}/{1}", parent, tag);
+            return string.Format("{0}\\{1}", parent, tag);
         }
     }
 }

@@ -16,7 +16,12 @@ namespace Meowth.TagFSDriver
             _storage = storage;
         }
 
-        public virtual int CreateFile(string filename, FileAccess access, FileShare share, FileMode mode, FileOptions options, DokanFileInfo info)
+        public virtual int CreateFile(string filename, 
+            FileAccess access, 
+            FileShare share, 
+            FileMode mode, 
+            FileOptions options, 
+            DokanFileInfo info)
         {
             try { return -1; }
             catch { return -1; }
@@ -24,21 +29,19 @@ namespace Meowth.TagFSDriver
 
         public virtual int OpenDirectory(string filename, DokanFileInfo info)
         {
-            try { return -1; }
-            catch { return -1; }
+            return DokanNet.DOKAN_SUCCESS;
         }
 
         public virtual int CreateDirectory(string filename, DokanFileInfo info)
         {
-            _storage.CreateTag(filename, null);
+            _storage.CreateTag(filename);
 
-            return 0;
+            return DokanNet.DOKAN_SUCCESS;
         }
 
         public virtual int Cleanup(string filename, DokanFileInfo info)
         {
-            try { return -1; }
-            catch { return -1; }
+            return DokanNet.DOKAN_SUCCESS;
         }
 
         public virtual int CloseFile(string filename, DokanFileInfo info)
@@ -73,10 +76,18 @@ namespace Meowth.TagFSDriver
 
         public virtual int FindFiles(string filename, ArrayList files, DokanFileInfo info)
         {
-            foreach (var tag in _storage.ListTags(null))
-                files.Add(tag.TagName);
+            foreach (var tag in _storage.ListTags(filename))
+                files.Add(new FileInformation
+                              {
+                                  Attributes = FileAttributes.Compressed | FileAttributes.Directory
+                                  | FileAttributes.NotContentIndexed,
+                                  CreationTime = DateTime.Now,
+                                  FileName = tag.TagName,
+                                  LastAccessTime = DateTime.Now,
+                                  LastWriteTime = DateTime.Now
+                              });
 
-            return 0;
+            return DokanNet.DOKAN_SUCCESS;
         }
 
         public virtual int SetFileAttributes(string filename, FileAttributes attr, DokanFileInfo info)
@@ -93,15 +104,15 @@ namespace Meowth.TagFSDriver
 
         public virtual int DeleteFile(string filename, DokanFileInfo info)
         {
-            throw new NotImplementedException();
             try { return -1; }
             catch { return -1; }
         }
 
         public virtual int DeleteDirectory(string filename, DokanFileInfo info)
         {
-            try { return -1; }
-            catch { return -1; }
+            _storage.DeleteTag(filename);
+
+            return DokanNet.DOKAN_SUCCESS;
         }
 
         public virtual int MoveFile(string filename, string newname, bool replace, DokanFileInfo info)
@@ -136,17 +147,19 @@ namespace Meowth.TagFSDriver
 
         public virtual int GetDiskFreeSpace(ref ulong freeBytesAvailable, ref ulong totalBytes, ref ulong totalFreeBytes, DokanFileInfo info)
         {
-            try { return -1; }
-            catch { return -1; }
+            // TODO:
+            freeBytesAvailable = 512 * 1024 * 1024;
+            totalBytes = 1024 * 1024 * 1024;
+            totalFreeBytes = 512 * 1024 * 1024;
+
+            return DokanNet.DOKAN_SUCCESS;
         }
 
         public virtual int Unmount(DokanFileInfo info)
         {
-            return DOKAN_SUCCESS;
+            return DokanNet.DOKAN_SUCCESS;
         }
-
-        private const int DOKAN_SUCCESS = 0;
-
+       
         private static readonly ILog s_logger = LogManager.GetLogger(typeof(TaggedFileSystem));
         
         /// <summary> File system options </summary>
